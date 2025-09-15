@@ -1,26 +1,26 @@
 {
-    "id": "99F7F775",
-    "path": "~/STAT 348/Git/Competitions/KaggleBikeShare/BikeShareAnalysis.R",
-    "project_path": "BikeShareAnalysis.R",
+    "id": "E7FC6A49",
+    "path": "~/STAT 348/Git/Competitions/KaggleBikeShare/Workflows.R",
+    "project_path": "Workflows.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "1070257959",
     "contents": "",
     "dirty": false,
-    "created": 1757530282515.0,
+    "created": 1757921748624.0,
     "source_on_save": false,
     "relative_order": 1,
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "17,28",
-        "scrollLine": "15"
+        "cursorPosition": "21,36",
+        "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1757530333,
+    "lastKnownWriteTime": 1757921736,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1757530333328,
+    "last_content_update": 1757921736,
     "read_only": false,
     "read_only_alternatives": []
 }

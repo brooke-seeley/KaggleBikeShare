@@ -3,7 +3,7 @@
     "path": "~/STAT 348/Git/Competitions/KaggleBikeShare/BikeShareAnalysis.R",
     "project_path": "BikeShareAnalysis.R",
     "type": "r_source",
-    "hash": "4111146863",
+    "hash": "2687049511",
     "contents": "",
     "dirty": false,
     "created": 1757530282515.0,
@@ -12,15 +12,15 @@
     "properties": {
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "27,0",
-        "scrollLine": "14"
+        "cursorPosition": "38,42",
+        "scrollLine": "29"
     },
     "folds": "",
-    "lastKnownWriteTime": 1757943746,
+    "lastKnownWriteTime": 1757958287,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1757943746159,
+    "last_content_update": 1757958287510,
     "read_only": false,
     "read_only_alternatives": []
 }

@@ -2,6 +2,7 @@ library(tidyverse)
 library(tidymodels)
 library(vroom)
 library(glmnet)
+install.packages("rpart")
 
 ## Read in Training Data & Clean
 
@@ -27,24 +28,27 @@ bike_recipe <- recipe(count~., data=trainData) %>%
   step_normalize(all_numeric_predictors()) %>%
   step_rm(datetime)
 
-## Create Penalized Regression Model for Tuning
+## Create Regression Tree for Tuning
 
-preg_model <- linear_reg(penalty=tune(),
-                         mixture=tune()) %>% 
-  set_engine("glmnet")
+reg_tree <- decision_tree(tree_depth = tune(),
+                          cost_complexity = tune(),
+                          min_n=tune()) %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
 
 ## Create Workflow
 
 bike_workflow <- workflow() %>%
   add_recipe(bike_recipe) %>%
-  add_model(preg_model)
+  add_model(reg_tree)
 
 ## Tuning
 
 ### Grid of Values
 
-grid_of_tuning_params <- grid_regular(penalty(),
-                                      mixture(),
+grid_of_tuning_params <- grid_regular(tree_depth(),
+                                      cost_complexity(),
+                                      min_n(),
                                       levels = 5)
 
 ### Split Data & Run CV

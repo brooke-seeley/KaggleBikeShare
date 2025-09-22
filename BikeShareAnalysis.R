@@ -2,7 +2,8 @@ library(tidyverse)
 library(tidymodels)
 library(vroom)
 library(glmnet)
-install.packages("rpart")
+library(rpart)
+library(ranger)
 
 ## Read in Training Data & Clean
 
@@ -36,18 +37,25 @@ reg_tree <- decision_tree(tree_depth = tune(),
   set_engine("rpart") %>%
   set_mode("regression")
 
+## Try Random Forest for Tuning
+
+rand_for <- rand_forest(mtry = tune(),
+                        min_n=tune(),
+                        trees=1000) %>%
+  set_engine("ranger") %>%
+  set_mode("regression")
+
 ## Create Workflow
 
 bike_workflow <- workflow() %>%
   add_recipe(bike_recipe) %>%
-  add_model(reg_tree)
+  add_model(rand_for)
 
 ## Tuning
 
 ### Grid of Values
 
-grid_of_tuning_params <- grid_regular(tree_depth(),
-                                      cost_complexity(),
+grid_of_tuning_params <- grid_regular(mtry(range=c(1,9)),
                                       min_n(),
                                       levels = 5)
 
@@ -64,7 +72,7 @@ CV_results <- bike_workflow %>%
 bestTune <- CV_results %>%
   select_best(metric="rmse")
 
-## Finalize Workflow & FIt
+## Finalize Workflow & Fit
 
 final_wf <-
   bike_workflow %>%

@@ -4,6 +4,8 @@ library(vroom)
 library(glmnet)
 library(rpart)
 library(ranger)
+library(bonsai)
+library(lightgbm)
 
 ## Read in Training Data & Clean
 
@@ -45,18 +47,27 @@ rand_for <- rand_forest(mtry = tune(),
   set_engine("ranger") %>%
   set_mode("regression")
 
+## Boosted Tree
+
+boost_model <- boost_tree(tree_depth=tune(),
+                          trees=tune(),
+                          learn_rate=tune()) %>%
+  set_engine("lightgbm") %>%
+  set_mode("regression")
+
 ## Create Workflow
 
 bike_workflow <- workflow() %>%
   add_recipe(bike_recipe) %>%
-  add_model(rand_for)
+  add_model(boost_model)
 
 ## Tuning
 
 ### Grid of Values
 
-grid_of_tuning_params <- grid_regular(mtry(range=c(1,9)),
-                                      min_n(),
+grid_of_tuning_params <- grid_regular(tree_depth(),
+                                      trees(), 
+                                      learn_rate(),
                                       levels = 5)
 
 ### Split Data & Run CV

@@ -6,6 +6,7 @@ library(rpart)
 library(ranger)
 library(bonsai)
 library(lightgbm)
+library(agua)
 
 ## Read in Training Data & Clean
 
@@ -31,68 +32,83 @@ bike_recipe <- recipe(count~., data=trainData) %>%
   step_normalize(all_numeric_predictors()) %>%
   step_rm(datetime)
 
-## Create Regression Tree for Tuning
+#####
 
-reg_tree <- decision_tree(tree_depth = tune(),
-                          cost_complexity = tune(),
-                          min_n=tune()) %>%
-  set_engine("rpart") %>%
+# ## Create Regression Tree for Tuning
+# 
+# reg_tree <- decision_tree(tree_depth = tune(),
+#                           cost_complexity = tune(),
+#                           min_n=tune()) %>%
+#   set_engine("rpart") %>%
+#   set_mode("regression")
+# 
+# ## Try Random Forest for Tuning
+# 
+# rand_for <- rand_forest(mtry = tune(),
+#                         min_n=tune(),
+#                         trees=1000) %>%
+#   set_engine("ranger") %>%
+#   set_mode("regression")
+# 
+# ## Boosted Tree
+# 
+# boost_model <- boost_tree(tree_depth=tune(),
+#                           trees=tune(),
+#                           learn_rate=tune()) %>%
+#   set_engine("lightgbm") %>%
+#   set_mode("regression")
+# 
+# ## Create Workflow
+# 
+# bike_workflow <- workflow() %>%
+#   add_recipe(bike_recipe) %>%
+#   add_model(boost_model)
+# 
+# ## Tuning
+# 
+# ### Grid of Values
+# 
+# grid_of_tuning_params <- grid_regular(tree_depth(),
+#                                       trees(), 
+#                                       learn_rate(),
+#                                       levels = 5)
+# 
+# ### Split Data & Run CV
+# 
+# folds <- vfold_cv(trainData, v = 10, repeats=1)
+# CV_results <- bike_workflow %>%
+#   tune_grid(resamples=folds,
+#             grid=grid_of_tuning_params,
+#             metrics=metric_set(rmse, mae, rsq))
+# 
+# ### Best Parameters
+# 
+# bestTune <- CV_results %>%
+#   select_best(metric="rmse")
+# 
+# ## Finalize Workflow & Fit
+# 
+# final_wf <-
+#   bike_workflow %>%
+#   finalize_workflow(bestTune) %>%
+#   fit(data=trainData)
+
+#####
+
+## Model Stacking
+
+h2o::h2o.init()
+auto_model <- auto_ml() %>%
+  set_engine("h2o", max_runtime_secs=300, max_models=15) %>%
   set_mode("regression")
-
-## Try Random Forest for Tuning
-
-rand_for <- rand_forest(mtry = tune(),
-                        min_n=tune(),
-                        trees=1000) %>%
-  set_engine("ranger") %>%
-  set_mode("regression")
-
-## Boosted Tree
-
-boost_model <- boost_tree(tree_depth=tune(),
-                          trees=tune(),
-                          learn_rate=tune()) %>%
-  set_engine("lightgbm") %>%
-  set_mode("regression")
-
-## Create Workflow
-
-bike_workflow <- workflow() %>%
+automl_wf <- workflow() %>%
   add_recipe(bike_recipe) %>%
-  add_model(boost_model)
-
-## Tuning
-
-### Grid of Values
-
-grid_of_tuning_params <- grid_regular(tree_depth(),
-                                      trees(), 
-                                      learn_rate(),
-                                      levels = 5)
-
-### Split Data & Run CV
-
-folds <- vfold_cv(trainData, v = 10, repeats=1)
-CV_results <- bike_workflow %>%
-  tune_grid(resamples=folds,
-            grid=grid_of_tuning_params,
-            metrics=metric_set(rmse, mae, rsq))
-
-### Best Parameters
-
-bestTune <- CV_results %>%
-  select_best(metric="rmse")
-
-## Finalize Workflow & Fit
-
-final_wf <-
-  bike_workflow %>%
-  finalize_workflow(bestTune) %>%
+  add_model(auto_model) %>%
   fit(data=trainData)
 
 ## Run Predictions
 
-bike_predictions <- predict(final_wf, new_data = testData) %>%
+bike_predictions <- predict(automl_wf, new_data = testData) %>%
   mutate(.pred = exp(.pred))
 
 ## Format the Predictions for Submission to Kaggle
